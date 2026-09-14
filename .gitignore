@@ -1,3 +1,6 @@
 build/
+build-v3/
+.venv/
+reports/
 __pycache__/
 .pytest_cache/

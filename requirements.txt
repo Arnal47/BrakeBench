@@ -1,0 +1,4 @@
+cantools>=39,<41
+python-can>=4.3,<5
+pytest>=8,<10
+ruff>=0.8,<1

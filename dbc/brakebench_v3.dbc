@@ -1,0 +1,44 @@
+VERSION "BrakeBench V3 - integration contract"
+NS_ :
+    CM_ BA_DEF_ BA_ VAL_
+BS_:
+BU_: SIL ECU
+
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 10000;
+
+BO_ 384 Brake_Command: 8 SIL
+ SG_ BrakeRequest : 0|8@1+ (1,0) [0|100] "%" ECU
+ SG_ VehicleSpeed : 8|9@1+ (0.5,0) [0|250] "kph" ECU
+ SG_ AliveCounter : 17|4@1+ (1,0) [0|15] "count" ECU
+ SG_ Checksum : 24|8@1+ (1,0) [0|255] "crc8" ECU
+ SG_ Validity : 32|1@1+ (1,0) [0|1] "bool" ECU
+BA_ "GenMsgCycleTime" BO_ 384 20;
+
+BO_ 385 Wheel_Speeds: 8 SIL
+ SG_ WheelSpeedFL : 0|10@1+ (0.5,0) [0|300] "kph" ECU
+ SG_ WheelSpeedFR : 10|10@1+ (0.5,0) [0|300] "kph" ECU
+ SG_ WheelSpeedRL : 20|10@1+ (0.5,0) [0|300] "kph" ECU
+ SG_ WheelSpeedRR : 30|10@1+ (0.5,0) [0|300] "kph" ECU
+ SG_ AliveCounter : 40|4@1+ (1,0) [0|15] "count" ECU
+ SG_ Checksum : 48|8@1+ (1,0) [0|255] "crc8" ECU
+ SG_ Validity : 56|1@1+ (1,0) [0|1] "bool" ECU
+BA_ "GenMsgCycleTime" BO_ 385 20;
+
+BO_ 386 Brake_Pressure_Feedback: 8 SIL
+ SG_ BrakePressureFeedback : 0|14@1+ (1,0) [0|12000] "kPa" ECU
+ SG_ AliveCounter : 14|4@1+ (1,0) [0|15] "count" ECU
+ SG_ Checksum : 24|8@1+ (1,0) [0|255] "crc8" ECU
+ SG_ Validity : 32|1@1+ (1,0) [0|1] "bool" ECU
+BA_ "GenMsgCycleTime" BO_ 386 20;
+
+BO_ 640 Brake_ECU_Status: 8 ECU
+ SG_ BrakePressureCommand : 0|14@1+ (1,0) [0|12000] "kPa" SIL
+ SG_ ABS_Active : 14|1@1+ (1,0) [0|1] "bool" SIL
+ SG_ ECU_State : 15|3@1+ (1,0) [0|4] "enum" SIL
+ SG_ DTC : 18|4@1+ (1,0) [0|9] "code" SIL
+ SG_ Severity : 22|2@1+ (1,0) [0|2] "enum" SIL
+ SG_ Failsafe : 24|1@1+ (1,0) [0|1] "bool" SIL
+ SG_ AliveCounter : 25|4@1+ (1,0) [0|15] "count" SIL
+ SG_ Checksum : 32|8@1+ (1,0) [0|255] "crc8" SIL
+ SG_ Validity : 40|1@1+ (1,0) [0|1] "bool" SIL
+BA_ "GenMsgCycleTime" BO_ 640 20;

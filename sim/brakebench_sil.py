@@ -1,4 +1,5 @@
 """Small deterministic SIL client for the BrakeBench stdin/stdout ECU runner."""
+
 from __future__ import annotations
 
 import subprocess
@@ -20,11 +21,21 @@ class Status:
 class BrakeBenchSil:
     def __init__(self, runner: str | Path) -> None:
         self._process = subprocess.Popen(
-            [str(runner)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            text=True, bufsize=1,
+            [str(runner)],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            bufsize=1,
         )
 
-    def send(self, request: int, vehicle: int, wheels: tuple[int, int, int, int], timestamp_ms: int, feedback_kpa: int | None = None) -> Status:
+    def send(
+        self,
+        request: int,
+        vehicle: int,
+        wheels: tuple[int, int, int, int],
+        timestamp_ms: int,
+        feedback_kpa: int | None = None,
+    ) -> Status:
         line = f"{request},{vehicle},{wheels[0]},{wheels[1]},{wheels[2]},{wheels[3]},{timestamp_ms}"
         return self._write(line if feedback_kpa is None else f"{line},{feedback_kpa}")
 
@@ -43,5 +54,16 @@ class BrakeBenchSil:
         assert self._process.stdin and self._process.stdout
         self._process.stdin.write(line + "\n")
         self._process.stdin.flush()
-        fields = dict(field.split("=", 1) for field in self._process.stdout.readline().strip().split(","))
-        return Status(fields["STATE"], fields["ABS"] == "1", fields["FAULT"], int(fields["PRESSURE"]), int(fields["DTC"]), int(fields["SEVERITY"]), fields["FAILSAFE"] == "1")
+        fields = dict(
+            field.split("=", 1)
+            for field in self._process.stdout.readline().strip().split(",")
+        )
+        return Status(
+            fields["STATE"],
+            fields["ABS"] == "1",
+            fields["FAULT"],
+            int(fields["PRESSURE"]),
+            int(fields["DTC"]),
+            int(fields["SEVERITY"]),
+            fields["FAILSAFE"] == "1",
+        )

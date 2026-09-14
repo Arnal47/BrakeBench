@@ -1,0 +1,5 @@
+# V3 Validation Test Plan
+
+Tests operate only through the DBC-encoded virtual CAN frames and runner output. `TC-CAN-001..009` cover nominal/status roundtrip, ABS, dropped-frame timeout, alive counter, independent checksum and Validity=0 checks, delayed/out-of-order traffic, one wheel out of range, and the DBC IDs/cycle/signal metadata contract. Runtime records from `TC-V2-001..013` cover nominal, ABS, timeout, corrupt traffic, wheel failsafe/degraded, all pressure faults, and non-latched recovery. `TC-V2-C-001` is read from CTest JUnit and verifies the public latched-DTC-clear API.
+
+Run CTest with `ctest --test-dir build --output-junit ctest.xml`, then pytest with `BRAKEBENCH_EVIDENCE=build/can_evidence.json`, and finally `py -3 tools/generate_validation_report.py --junit build/pytest.xml --ctest-junit build/ctest.xml --evidence build/can_evidence.json`. The generator joins runtime evidence with real pytest and CTest JUnit outcomes. It never accepts hand-entered verdict or evidence values.

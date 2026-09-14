@@ -3,6 +3,7 @@
 #endif
 #include "brake_ecu.h"
 #include "can_interface.h"
+#include "can_application_adapter.h"
 #include <stdio.h>
 
 int main(void) {
@@ -15,18 +16,11 @@ int main(void) {
     while (fgets(line, sizeof line, stdin) != NULL) {
         BrakeCanOutput output;
         if (can_interface_decode_request(line, &input)) {
-            brake_ecu_receive(&ecu, &input);
-            brake_ecu_tick(&ecu, input.received_at_ms);
+            can_application_deliver(&ecu, &input, input.received_at_ms);
         } else {
             unsigned long now;
             if (sscanf(line, "CORRUPT,%lu", &now) == 1) {
-                input.brake_request_pct = 0U;
-                input.vehicle_speed_kph = 0U;
-                input.pressure_feedback_kpa = 0U;
-                input.signal_valid = false;
-                input.received_at_ms = (uint32_t)now;
-                brake_ecu_receive(&ecu, &input);
-                brake_ecu_tick(&ecu, input.received_at_ms);
+                can_application_deliver_invalid(&ecu, (uint32_t)now);
             } else if (sscanf(line, "TICK,%lu", &now) == 1) {
                 brake_ecu_tick(&ecu, (uint32_t)now);
             }
