@@ -6,7 +6,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "sim"))
 from brakebench_sil import BrakeBenchSil
-from fault_harness import evidence
+from fault_harness import evidence, infer_root_cause
 
 
 @pytest.fixture
@@ -56,6 +56,7 @@ def test_timeout_reports_dtc_and_failsafe(sil: BrakeBenchSil) -> None:
     assert status.dtc == 1 and status.severity == 2 and status.failsafe
     record = evidence(100, 201, status, "no CAN command frame after 100 ms")
     assert record.latency_ms == 101 and record.dtc == 1 and record.failsafe
+    assert infer_root_cause(status, "no CAN command frame after 100 ms") == "missing CAN command: no CAN command frame after 100 ms"
 
 
 def test_wheel_stuck_degrades_without_failsafe(sil: BrakeBenchSil) -> None:

@@ -7,6 +7,7 @@
 | DTC confirmation uses a 40 ms debounce | initial input remains non-faulted; second timestamp confirms | `test_overpressure_fault_injection`, `test_invalid_wheel_speed_fault_injection` | Pass |
 | Invalid request is safe | `SIGNAL_INVALID` DTC and zero pressure | `test_overpressure_fault_injection` | Pass |
 | Wheel range violation is safe | wheel-range DTC and zero pressure | `test_invalid_wheel_speed_fault_injection` | Pass |
+| Four-wheel plausibility mismatch degrades control | mismatch DTC and degraded severity | `test_wheel_mismatch_degrades` | Pass |
 | Wheel-stuck fault degrades control | wheel-stuck DTC and degraded severity | `test_wheel_stuck_degrades_without_failsafe` | Pass |
 | Corrupt CAN signal is safe | message-corrupt DTC and failsafe | `test_corrupt_message_fault_injection` | Pass |
 | Pressure feedback faults are safe | pressure DTC and failsafe | `test_pressure_under_response_fault_injection`, `test_pressure_stuck_high_fault_injection`, `test_pressure_stuck_low_fault_injection` | Pass |
