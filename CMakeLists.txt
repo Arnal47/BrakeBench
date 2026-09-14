@@ -9,6 +9,7 @@ add_library(brake_ecu STATIC
     src/brake_controller.c
     src/diagnostics.c
     src/can_interface.c
+    src/can_application_adapter.c
     src/brake_ecu.c)
 target_include_directories(brake_ecu PUBLIC include)
 target_compile_options(brake_ecu PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX> $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror -pedantic>)
