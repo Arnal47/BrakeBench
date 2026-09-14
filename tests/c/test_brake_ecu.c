@@ -8,6 +8,8 @@ static BrakeCanInput valid_input(uint16_t request, uint16_t speed, uint32_t time
     memset(&input, 0, sizeof(input));
     input.brake_request_pct = request;
     input.vehicle_speed_kph = speed;
+    input.pressure_feedback_kpa = (uint16_t)(((uint32_t)request * BRAKE_MAX_PRESSURE_KPA) / 100U);
+    input.signal_valid = true;
     input.received_at_ms = time;
     for (i = 0U; i < BRAKE_WHEEL_COUNT; ++i) { input.wheel_speed_kph[i] = speed; }
     return input;
@@ -37,10 +39,13 @@ int main(void) {
     assert(output.state == BRAKE_ECU_FAULT);
     assert(output.fault == BRAKE_FAULT_CAN_TIMEOUT);
 
-    input = valid_input(101U, 50U, 202U);
+    brake_ecu_clear_latched_dtc(&ecu);
+    input = valid_input(20U, 50U, 202U);
     brake_ecu_receive(&ecu, &input);
     brake_ecu_tick(&ecu, 202U);
     output = brake_ecu_output(&ecu);
-    assert(output.fault == BRAKE_FAULT_PRESSURE);
+    assert(output.dtc == DTC_NONE);
+    assert(output.state == BRAKE_ECU_BRAKING);
+
     return 0;
 }
