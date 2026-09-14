@@ -41,11 +41,12 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 py -3 -m pip install -r requirements.txt
 $env:BRAKEBENCH_RUNNER = (Resolve-Path build/brake_ecu_runner.exe)
+$env:BRAKEBENCH_EVIDENCE = "build/can_evidence.json"
 py -3 -m pytest tests/python -q --junitxml=build/pytest.xml
-py -3 tools/generate_validation_report.py --junit build/pytest.xml
+py -3 tools/generate_validation_report.py --junit build/pytest.xml --evidence build/can_evidence.json
 ```
 
-The report generator produces Markdown, CSV and JSON from real JUnit results in `reports/`; it does not contain manually entered verdicts. See the [requirements](requirements/v3_system_requirements.md), [Validation Test Plan](docs/v3_validation_test_plan.md), and [HARA/DFMEA starter](docs/v3_hara_dfmea_starter.md). These artifacts are educational engineering exercises, **not a production safety case or ISO 26262 compliance claim**.
+The report generator produces Markdown, CSV and JSON by joining real JUnit results with runtime virtual-CAN evidence in `reports/`; it does not contain manually entered verdicts or static fault outcomes. See the [requirements](requirements/v3_system_requirements.md), [Validation Test Plan](docs/v3_validation_test_plan.md), and [HARA/DFMEA starter](docs/v3_hara_dfmea_starter.md). These artifacts are educational engineering exercises, **not a production safety case or ISO 26262 compliance claim**.
 
 The runner accepts a CSV input frame: `request,vehicle,wheelFL,wheelFR,wheelRL,wheelRR,timestamp_ms`. Send `TICK,timestamp_ms` to advance time without new CAN input. It emits `STATE`, `ABS`, `FAULT`, and `PRESSURE` fields per line.
 

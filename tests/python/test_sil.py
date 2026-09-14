@@ -1,6 +1,6 @@
-from pathlib import Path
 import os
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -21,7 +21,11 @@ def sil() -> BrakeBenchSil:
 
 def test_nominal_braking(sil: BrakeBenchSil) -> None:
     status = sil.send(50, 80, (80, 80, 80, 80), 100)
-    assert (status.state, status.fault, status.pressure_kpa) == ("BRAKING", "NONE", 6000)
+    assert (status.state, status.fault, status.pressure_kpa) == (
+        "BRAKING",
+        "NONE",
+        6000,
+    )
 
 
 def test_abs_intervention(sil: BrakeBenchSil) -> None:
@@ -33,7 +37,11 @@ def test_abs_intervention(sil: BrakeBenchSil) -> None:
 def test_can_timeout_fault_injection(sil: BrakeBenchSil) -> None:
     sil.send(30, 60, (60, 60, 60, 60), 100)
     status = sil.tick(201)
-    assert (status.state, status.fault, status.pressure_kpa) == ("FAULT", "CAN_TIMEOUT", 0)
+    assert (status.state, status.fault, status.pressure_kpa) == (
+        "FAULT",
+        "CAN_TIMEOUT",
+        0,
+    )
 
 
 def test_overpressure_fault_injection(sil: BrakeBenchSil) -> None:
@@ -46,7 +54,11 @@ def test_overpressure_fault_injection(sil: BrakeBenchSil) -> None:
 def test_invalid_wheel_speed_fault_injection(sil: BrakeBenchSil) -> None:
     sil.send(40, 60, (60, 301, 60, 60), 100)
     status = sil.send(40, 60, (60, 301, 60, 60), 140)
-    assert (status.state, status.fault, status.pressure_kpa) == ("FAULT", "WHEEL_SPEED", 0)
+    assert (status.state, status.fault, status.pressure_kpa) == (
+        "FAULT",
+        "WHEEL_SPEED",
+        0,
+    )
     assert status.dtc == 2 and status.failsafe
 
 
@@ -56,7 +68,10 @@ def test_timeout_reports_dtc_and_failsafe(sil: BrakeBenchSil) -> None:
     assert status.dtc == 1 and status.severity == 2 and status.failsafe
     record = evidence(100, 201, status, "no CAN command frame after 100 ms")
     assert record.latency_ms == 101 and record.dtc == 1 and record.failsafe
-    assert infer_root_cause(status, "no CAN command frame after 100 ms") == "missing CAN command: no CAN command frame after 100 ms"
+    assert (
+        infer_root_cause(status, "no CAN command frame after 100 ms")
+        == "missing CAN command: no CAN command frame after 100 ms"
+    )
 
 
 def test_wheel_stuck_degrades_without_failsafe(sil: BrakeBenchSil) -> None:
