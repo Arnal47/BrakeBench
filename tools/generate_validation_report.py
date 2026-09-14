@@ -12,6 +12,7 @@ from xml.etree import ElementTree as ET
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--junit", required=True)
+    p.add_argument("--ctest-junit", required=True)
     p.add_argument("--evidence", required=True)
     p.add_argument("--out", default="reports")
     a = p.parse_args()
@@ -34,6 +35,19 @@ def main():
         "TC-CAN-007": "test_out_of_order_and_delayed_frame_are_public_faults",
         "TC-CAN-008": "test_single_signal_out_of_range_reaches_ecu",
         "TC-CAN-009": "test_dbc_contract_ids_cycles_and_signal_metadata",
+        "TC-V2-001": "test_nominal_braking",
+        "TC-V2-002": "test_abs_intervention",
+        "TC-V2-003": "test_can_timeout_fault_injection",
+        "TC-V2-004": "test_overpressure_fault_injection",
+        "TC-V2-005": "test_invalid_wheel_speed_fault_injection",
+        "TC-V2-006": "test_timeout_reports_dtc_and_failsafe",
+        "TC-V2-007": "test_wheel_stuck_degrades_without_failsafe",
+        "TC-V2-008": "test_wheel_mismatch_degrades",
+        "TC-V2-009": "test_non_latched_dtc_recovers_after_stable_input",
+        "TC-V2-010": "test_corrupt_message_fault_injection",
+        "TC-V2-011": "test_pressure_under_response_fault_injection",
+        "TC-V2-012": "test_pressure_stuck_high_fault_injection",
+        "TC-V2-013": "test_pressure_stuck_low_fault_injection",
     }
     for record in evidence:
         test_name = test_names[record["test_id"]]
@@ -50,6 +64,26 @@ def main():
         )
         record["evidence_artifact"] = record.pop("artifact")
         rows.append(record)
+    ctest_root = ET.parse(a.ctest_junit).getroot()
+    ctest_case = next(
+        case
+        for case in ctest_root.iter("testcase")
+        if case.attrib["name"] == "ecu_unit_tests"
+    )
+    ctest_result = "FAIL" if ctest_case.find("failure") is not None else "PASS"
+    rows.append(
+        {
+            "test_id": "TC-V2-C-001",
+            "requirement_id": "REQ-DIAG-003",
+            "result": ctest_result,
+            "dtc": "public C API clear verification",
+            "recovery": "latched DTC clear",
+            "fault_injection_time_ms": None,
+            "detection_latency_ms": None,
+            "failsafe_or_degraded": "C unit test",
+            "evidence_artifact": f"{a.ctest_junit}::ecu_unit_tests",
+        }
+    )
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     with (out / "v3_traceability.csv").open("w", newline="", encoding="utf-8") as f:

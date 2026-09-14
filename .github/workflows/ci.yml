@@ -12,8 +12,8 @@ jobs:
       - name: C11 warnings-as-errors build
         run: cmake -S . -B build -DCMAKE_C_COMPILER=clang && cmake --build build
       - name: C unit tests
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build --output-on-failure --output-junit ctest.xml
       - name: Python quality gate
         run: python -m pip install ruff && ruff check sim tests tools && ruff format --check sim tests tools
       - name: DBC virtual-CAN SIL tests and evidence
-        run: BRAKEBENCH_RUNNER=$PWD/build/brake_ecu_runner BRAKEBENCH_EVIDENCE=build/can_evidence.json python -m pytest -p no:cacheprovider tests/python -q --junitxml=build/pytest.xml && python tools/generate_validation_report.py --junit build/pytest.xml --evidence build/can_evidence.json
+        run: BRAKEBENCH_RUNNER=$PWD/build/brake_ecu_runner BRAKEBENCH_EVIDENCE=build/can_evidence.json python -m pytest -p no:cacheprovider tests/python -q --junitxml=build/pytest.xml && python tools/generate_validation_report.py --junit build/pytest.xml --ctest-junit build/ctest.xml --evidence build/can_evidence.json
