@@ -12,6 +12,9 @@ class Status:
     abs_active: bool
     fault: str
     pressure_kpa: int
+    dtc: int
+    severity: int
+    failsafe: bool
 
 
 class BrakeBenchSil:
@@ -21,11 +24,15 @@ class BrakeBenchSil:
             text=True, bufsize=1,
         )
 
-    def send(self, request: int, vehicle: int, wheels: tuple[int, int, int, int], timestamp_ms: int) -> Status:
-        return self._write(f"{request},{vehicle},{wheels[0]},{wheels[1]},{wheels[2]},{wheels[3]},{timestamp_ms}")
+    def send(self, request: int, vehicle: int, wheels: tuple[int, int, int, int], timestamp_ms: int, feedback_kpa: int | None = None) -> Status:
+        line = f"{request},{vehicle},{wheels[0]},{wheels[1]},{wheels[2]},{wheels[3]},{timestamp_ms}"
+        return self._write(line if feedback_kpa is None else f"{line},{feedback_kpa}")
 
     def tick(self, timestamp_ms: int) -> Status:
         return self._write(f"TICK,{timestamp_ms}")
+
+    def corrupt(self, timestamp_ms: int) -> Status:
+        return self._write(f"CORRUPT,{timestamp_ms}")
 
     def close(self) -> None:
         if self._process.stdin:
@@ -37,4 +44,4 @@ class BrakeBenchSil:
         self._process.stdin.write(line + "\n")
         self._process.stdin.flush()
         fields = dict(field.split("=", 1) for field in self._process.stdout.readline().strip().split(","))
-        return Status(fields["STATE"], fields["ABS"] == "1", fields["FAULT"], int(fields["PRESSURE"]))
+        return Status(fields["STATE"], fields["ABS"] == "1", fields["FAULT"], int(fields["PRESSURE"]), int(fields["DTC"]), int(fields["SEVERITY"]), fields["FAILSAFE"] == "1")

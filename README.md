@@ -27,3 +27,11 @@ The runner accepts a CSV input frame: `request,vehicle,wheelFL,wheelFR,wheelRL,w
 - `sim/brakebench_sil.py`: lightweight subprocess SIL client.
 - `docs/traceability.md`: requirement-to-test mapping.
 - `docs/test_report.md`: verification scope and acceptance record.
+
+## V2 diagnostics
+
+V2 adds a debounced diagnostic state machine. The runner status now exposes `DTC`, `SEVERITY`, and `FAILSAFE` in addition to the legacy state, fault, ABS, and pressure fields. A confirmed failsafe DTC commands zero pressure; a degraded DTC preserves controlled operation.
+
+See [the DTC fault matrix](docs/v2_fault_matrix.md) for detection evidence, confirmation timing, severity, latching, and recovery rules, and [root-cause analysis](docs/v2_root_cause_analysis.md) for the evidence-based SIL reporting method.
+
+`sim/fault_harness.py` turns public runner status into timestamped fault evidence without duplicating C diagnostic logic.

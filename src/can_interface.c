@@ -5,9 +5,10 @@
 #include <stdio.h>
 
 bool can_interface_decode_request(const char *line, BrakeCanInput *input) {
-    unsigned int request, vehicle, w0, w1, w2, w3, timestamp;
-    if (sscanf(line, "%u,%u,%u,%u,%u,%u,%u", &request, &vehicle, &w0, &w1, &w2, &w3, &timestamp) != 7) { return false; }
+    unsigned int request, vehicle, w0, w1, w2, w3, timestamp, feedback = 0U;
+    int fields = sscanf(line, "%u,%u,%u,%u,%u,%u,%u,%u", &request, &vehicle, &w0, &w1, &w2, &w3, &timestamp, &feedback);
+    if (fields != 7 && fields != 8) { return false; }
     if (request > 65535U || vehicle > 65535U || w0 > 65535U || w1 > 65535U || w2 > 65535U || w3 > 65535U) { return false; }
-    input->brake_request_pct = (uint16_t)request; input->vehicle_speed_kph = (uint16_t)vehicle; input->wheel_speed_kph[0] = (uint16_t)w0; input->wheel_speed_kph[1] = (uint16_t)w1; input->wheel_speed_kph[2] = (uint16_t)w2; input->wheel_speed_kph[3] = (uint16_t)w3; input->received_at_ms = timestamp; return true;
+    input->brake_request_pct = (uint16_t)request; input->vehicle_speed_kph = (uint16_t)vehicle; input->wheel_speed_kph[0] = (uint16_t)w0; input->wheel_speed_kph[1] = (uint16_t)w1; input->wheel_speed_kph[2] = (uint16_t)w2; input->wheel_speed_kph[3] = (uint16_t)w3; input->pressure_feedback_kpa = fields == 8 ? (uint16_t)feedback : (uint16_t)(((uint32_t)request * BRAKE_MAX_PRESSURE_KPA) / 100U); input->signal_valid = true; input->received_at_ms = timestamp; return true;
 }
-void can_interface_encode_status(const BrakeCanOutput *output, char *buffer, uint32_t buffer_size) { (void)snprintf(buffer, buffer_size, "STATE=%s,ABS=%u,FAULT=%s,PRESSURE=%u", brake_ecu_state_name(output->state), output->abs_active ? 1U : 0U, brake_fault_name(output->fault), output->pressure_kpa); }
+void can_interface_encode_status(const BrakeCanOutput *output, char *buffer, uint32_t buffer_size) { (void)snprintf(buffer, buffer_size, "STATE=%s,ABS=%u,FAULT=%s,PRESSURE=%u,DTC=%u,SEVERITY=%u,FAILSAFE=%u", brake_ecu_state_name(output->state), output->abs_active ? 1U : 0U, brake_fault_name(output->fault), output->pressure_kpa, (unsigned int)output->dtc, (unsigned int)output->severity, output->failsafe ? 1U : 0U); }

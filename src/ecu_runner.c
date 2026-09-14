@@ -19,7 +19,15 @@ int main(void) {
             brake_ecu_tick(&ecu, input.received_at_ms);
         } else {
             unsigned long now;
-            if (sscanf(line, "TICK,%lu", &now) == 1) {
+            if (sscanf(line, "CORRUPT,%lu", &now) == 1) {
+                input.brake_request_pct = 0U;
+                input.vehicle_speed_kph = 0U;
+                input.pressure_feedback_kpa = 0U;
+                input.signal_valid = false;
+                input.received_at_ms = (uint32_t)now;
+                brake_ecu_receive(&ecu, &input);
+                brake_ecu_tick(&ecu, input.received_at_ms);
+            } else if (sscanf(line, "TICK,%lu", &now) == 1) {
                 brake_ecu_tick(&ecu, (uint32_t)now);
             }
         }
