@@ -21,6 +21,7 @@ typedef struct BrakeEcu BrakeEcu;
 void brake_ecu_init(BrakeEcu *ecu);
 void brake_ecu_receive(BrakeEcu *ecu, const BrakeCanInput *input);
 void brake_ecu_tick(BrakeEcu *ecu, uint32_t now_ms);
+void brake_ecu_clear_latched_dtc(BrakeEcu *ecu);
 BrakeCanOutput brake_ecu_output(const BrakeEcu *ecu);
 const char *brake_ecu_state_name(BrakeEcuState state);
 const char *brake_fault_name(BrakeFaultCode fault);

@@ -39,5 +39,13 @@ int main(void) {
     assert(output.state == BRAKE_ECU_FAULT);
     assert(output.fault == BRAKE_FAULT_CAN_TIMEOUT);
 
+    brake_ecu_clear_latched_dtc(&ecu);
+    input = valid_input(20U, 50U, 202U);
+    brake_ecu_receive(&ecu, &input);
+    brake_ecu_tick(&ecu, 202U);
+    output = brake_ecu_output(&ecu);
+    assert(output.dtc == DTC_NONE);
+    assert(output.state == BRAKE_ECU_BRAKING);
+
     return 0;
 }

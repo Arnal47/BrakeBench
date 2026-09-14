@@ -2,7 +2,7 @@
 #include <string.h>
 
 static DtcCode detect(const BrakeCanInput *i, uint32_t now, uint32_t last, bool has, uint16_t command, const Diagnostics *d) {
-    uint32_t index, sum = 0U;
+    uint32_t index, sum = 0U, unchanged = 0U;
     (void)now;
     if (!has || now - last > BRAKE_CAN_TIMEOUT_MS) return DTC_CAN_TIMEOUT;
     if (!i->signal_valid) return DTC_MESSAGE_CORRUPT;
@@ -10,9 +10,10 @@ static DtcCode detect(const BrakeCanInput *i, uint32_t now, uint32_t last, bool 
     for (index = 0U; index < BRAKE_WHEEL_COUNT; ++index) {
         if (i->wheel_speed_kph[index] > 300U) return DTC_WHEEL_RANGE;
         sum += i->wheel_speed_kph[index];
+        if (d->has_history && i->wheel_speed_kph[index] == d->last_wheels[index]) ++unchanged;
     }
     if (i->vehicle_speed_kph > 10U && sum / BRAKE_WHEEL_COUNT < i->vehicle_speed_kph / 2U) return DTC_WHEEL_MISMATCH;
-    if (d->has_history && i->vehicle_speed_kph > 15U && memcmp(i->wheel_speed_kph, d->last_wheels, sizeof d->last_wheels) == 0) return DTC_WHEEL_STUCK;
+    if (d->has_history && i->vehicle_speed_kph > 15U && unchanged == 1U) return DTC_WHEEL_STUCK;
     if (command > 2000U && i->pressure_feedback_kpa + 1500U < command) return DTC_PRESSURE_UNDER_RESPONSE;
     if (command == 0U && i->pressure_feedback_kpa > 1000U) return DTC_PRESSURE_STUCK_HIGH;
     if (command > 1000U && i->pressure_feedback_kpa < 100U) return DTC_PRESSURE_STUCK_LOW;

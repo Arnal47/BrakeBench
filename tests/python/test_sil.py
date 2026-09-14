@@ -60,9 +60,15 @@ def test_timeout_reports_dtc_and_failsafe(sil: BrakeBenchSil) -> None:
 
 def test_wheel_stuck_degrades_without_failsafe(sil: BrakeBenchSil) -> None:
     sil.send(30, 60, (60, 60, 60, 60), 100)
-    sil.send(30, 60, (60, 60, 60, 60), 140)
-    status = sil.send(30, 60, (60, 60, 60, 60), 180)
+    sil.send(30, 60, (60, 61, 61, 61), 140)
+    status = sil.send(30, 60, (60, 62, 62, 62), 180)
     assert status.dtc == 3 and status.severity == 1 and not status.failsafe
+
+
+def test_wheel_mismatch_degrades(sil: BrakeBenchSil) -> None:
+    sil.send(30, 60, (20, 20, 20, 20), 100)
+    status = sil.send(30, 60, (21, 21, 21, 21), 140)
+    assert status.dtc == 4 and status.severity == 1 and not status.failsafe
 
 
 def test_non_latched_dtc_recovers_after_stable_input(sil: BrakeBenchSil) -> None:
