@@ -1,0 +1,28 @@
+VERSION "BrakeBench V1"
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    BO_TX_BU_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: SIL ECU
+
+BO_ 256 Brake_Request: 8 SIL
+ SG_ BrakeRequestPct : 0|8@1+ (1,0) [0|100] "%" ECU
+ SG_ VehicleSpeedKph : 8|8@1+ (1,0) [0|300] "kph" ECU
+ SG_ WheelFLKph : 16|8@1+ (1,0) [0|300] "kph" ECU
+ SG_ WheelFRKph : 24|8@1+ (1,0) [0|300] "kph" ECU
+ SG_ WheelRLKph : 32|8@1+ (1,0) [0|300] "kph" ECU
+ SG_ WheelRRKph : 40|8@1+ (1,0) [0|300] "kph" ECU
+
+BO_ 257 Brake_Status: 8 ECU
+ SG_ EcuState : 0|3@1+ (1,0) [0|4] "" SIL
+ SG_ AbsActive : 3|1@1+ (1,0) [0|1] "" SIL
+ SG_ FaultCode : 8|8@1+ (1,0) [0|3] "" SIL
+ SG_ PressureKpa : 16|16@1+ (1,0) [0|12000] "kPa" SIL
